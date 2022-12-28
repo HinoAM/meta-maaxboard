@@ -1,0 +1,21 @@
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+# Firmware for AzureWave AW-CM390SM Modules
+SRC_URI += " \
+            file://AW_CM390SM.tar.bz2;unpack=true;subdir=maaxboard-firmware \
+"
+
+az_install_firmware() {
+    # Install AzureWave AW-CM390SM firmware
+    install -m 0644 ${WORKDIR}/maaxboard-firmware/AW_CM390SM/brcm/brcmfmac43455-sdio.bin ${D}${nonarch_base_libdir}/firmware/brcm
+    install -m 0644 ${WORKDIR}/maaxboard-firmware/AW_CM390SM/brcm/brcmfmac43455-sdio.clm_blob ${D}${nonarch_base_libdir}/firmware/brcm
+    install -m 0644 ${WORKDIR}/maaxboard-firmware/AW_CM390SM/brcm/brcmfmac43455-sdio.txt ${D}${nonarch_base_libdir}/firmware/brcm
+}
+
+do_install:append:maaxboard () {
+    az_install_firmware
+}
+
+do_install:append:maaxboardmini () {
+    az_install_firmware
+}
