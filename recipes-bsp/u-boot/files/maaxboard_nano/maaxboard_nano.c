@@ -4,6 +4,9 @@
  */
 
 #include <common.h>
+#include <env.h>
+#include <init.h>
+#include <asm/global_data.h>
 #include <miiphy.h>
 #include <netdev.h>
 #include <asm/mach-imx/iomux-v3.h>
@@ -16,8 +19,9 @@
 #include <asm/mach-imx/boot_mode.h>
 #include <i2c.h>
 #include <asm/io.h>
-#include "../common/tcpc.h"
 #include <usb.h>
+#include <imx_sip.h>
+#include <linux/arm-smccc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -99,6 +103,10 @@ static int setup_fec(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
+	if (phydev->drv->config)
+		phydev->drv->config(phydev);
+
+#ifndef CONFIG_DM_ETH
 	/* enable rgmii rxc skew and phy mode select to RGMII copper */
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x1f);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x8);
@@ -107,9 +115,8 @@ int board_phy_config(struct phy_device *phydev)
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x82ee);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x05);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x100);
+#endif
 
-	if (phydev->drv->config)
-		phydev->drv->config(phydev);
 	return 0;
 }
 #endif
@@ -270,7 +277,7 @@ int board_ehci_usb_phy_mode(struct udevice *dev)
 	enum typec_cc_state state;
 	struct tcpc_port *port_ptr;
 
-	if (dev->req_seq == 0)
+	if (dev_seq(dev) == 0)
 		port_ptr = &port1;
 	else
 		port_ptr = &port2;
@@ -288,8 +295,6 @@ int board_ehci_usb_phy_mode(struct udevice *dev)
 
 #endif
 
-#define FSL_SIP_GPC			0xC2000000
-#define FSL_SIP_CONFIG_GPC_PM_DOMAIN	0x3
 #define DISPMIX				9
 #define MIPI				10
 
@@ -309,6 +314,8 @@ static void led_on(void)
 
 int board_init(void)
 {
+	struct arm_smccc_res res;
+
 #ifdef CONFIG_USB_TCPC
 	setup_typec();
 #endif
@@ -319,9 +326,10 @@ int board_init(void)
 	if (IS_ENABLED(CONFIG_FEC_MXC))
 		setup_fec();
 
-	call_imx_sip(FSL_SIP_GPC, FSL_SIP_CONFIG_GPC_PM_DOMAIN, DISPMIX, true, 0);
-	call_imx_sip(FSL_SIP_GPC, FSL_SIP_CONFIG_GPC_PM_DOMAIN, MIPI, true, 0);
-
+	arm_smccc_smc(IMX_SIP_GPC, IMX_SIP_GPC_PM_DOMAIN,
+		      DISPMIX, true, 0, 0, 0, 0, &res);
+	arm_smccc_smc(IMX_SIP_GPC, IMX_SIP_GPC_PM_DOMAIN,
+		      MIPI, true, 0, 0, 0, 0, &res);
 	return 0;
 }
 
@@ -372,17 +380,17 @@ int board_late_init(void)
 	return 0;
 }
 
-#ifdef CONFIG_FSL_FASTBOOT
-#ifdef CONFIG_ANDROID_RECOVERY
-int is_recovery_key_pressing(void)
-{
-	return 0; /*TODO*/
-}
-#endif /*CONFIG_ANDROID_RECOVERY*/
-#endif /*CONFIG_FSL_FASTBOOT*/
-
 #ifdef CONFIG_ANDROID_SUPPORT
 bool is_power_key_pressed(void) {
 	return (bool)(!!(readl(SNVS_HPSR) & (0x1 << 6)));
 }
 #endif
+
+#ifdef CONFIG_FSL_FASTBOOT
+#ifdef CONFIG_ANDROID_RECOVERY
+int is_recovery_key_pressing(void)
+{
+	return 0; /* TODO */
+}
+#endif /* CONFIG_ANDROID_RECOVERY */
+#endif /* CONFIG_FSL_FASTBOOT */

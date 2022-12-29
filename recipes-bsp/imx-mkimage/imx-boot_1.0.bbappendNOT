@@ -48,7 +48,7 @@ copy_uboot_dtb() {
     cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME}   ${BOOT_STAGING}/${target_dtb_name}
 }
 
-do_compile_maaxboardbase() {
+do_compile:maaxboardbase() {
     local dtb_target_name=
 
     compile_${SOC_FAMILY}
@@ -59,11 +59,11 @@ do_compile_maaxboardbase() {
     fi
     # mkimage for i.MX8
     for target in ${IMXBOOT_TARGETS}; do
-        dtb_target_name=$(get_uboot_dtb_name_by_mk_target ${SOC_TARGET} ${target})
+        dtb_target_name=$(get_uboot_dtb_name_by_mk_target ${IMX_BOOT_SOC_TARGET} ${target})
         bbnote "generate ${dtb_target_name} for ${target} from ${UBOOT_DTB_NAME}"
         copy_uboot_dtb ${dtb_target_name}
-        bbnote "building ${SOC_TARGET} - ${REV_OPTION} ${target}"
-        make SOC=${SOC_TARGET} ${REV_OPTION} ${target}
+        bbnote "building ${IMX_BOOT_SOC_TARGET} - ${REV_OPTION} ${target}"
+        make SOC=${IMX_BOOT_SOC_TARGET} ${REV_OPTION} ${target}
         if [ -e "${BOOT_STAGING}/flash.bin" ]; then
             cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${target}
         fi

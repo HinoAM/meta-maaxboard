@@ -22,7 +22,7 @@
 
 	chosen {
 		bootargs = "console=ttymxc1,115200 earlycon=ec_imx6q,0x30890000,115200";
-		stdout-path = &uart2;
+		stdout-path = &uart1;
 	};
 
 	regulators {
@@ -101,11 +101,6 @@
             linux,code = <KEY_BACK>;
         };
 	};
-};
-
-&clk {
-	assigned-clocks = <&clk IMX8MM_AUDIO_PLL1>, <&clk IMX8MM_AUDIO_PLL2>;
-	assigned-clock-rates = <786432000>, <722534400>;
 };
 
 &iomuxc {
