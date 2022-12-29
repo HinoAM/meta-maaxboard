@@ -7,6 +7,7 @@
 #include <command.h>
 #include <cpu_func.h>
 #include <hang.h>
+#include <init.h>
 #include <spl.h>
 #include <asm/io.h>
 #include <asm/mach-imx/iomux-v3.h>
@@ -21,6 +22,7 @@
 #include <asm/mach-imx/gpio.h>
 #include <asm/mach-imx/mxc_i2c.h>
 #include <fsl_esdhc_imx.h>
+#include <fsl_sec.h>
 #include <mmc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -180,6 +182,11 @@ int power_init_board(void)
 
 void spl_board_init(void)
 {
+#ifdef CONFIG_FSL_CAAM
+	if (sec_init()) {
+		printf("\nsec_init failed!\n");
+	}
+#endif
 #ifndef CONFIG_SPL_USB_SDP_SUPPORT
 	/* Serial download mode */
 	if (is_usb_boot()) {

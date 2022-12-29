@@ -1,0 +1,28 @@
+MACHINE ??= 'maaxboard-mini-ddr4-2g-sdcard'
+DISTRO ?= 'fsl-imx-wayland'
+PACKAGE_CLASSES ?= 'package_deb'
+EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+USER_CLASSES ?= "buildstats"
+PATCHRESOLVE = "noop"
+BB_DISKMON_DIRS ??= "\
+    STOPTASKS,${TMPDIR},1G,100K \
+    STOPTASKS,${DL_DIR},1G,100K \
+    STOPTASKS,${SSTATE_DIR},1G,100K \
+    STOPTASKS,/tmp,100M,100K \
+    ABORT,${TMPDIR},100M,1K \
+    ABORT,${DL_DIR},100M,1K \
+    ABORT,${SSTATE_DIR},100M,1K \
+    ABORT,/tmp,10M,1K"
+PACKAGECONFIG:append:pn-qemu-system-native = " sdl"
+CONF_VERSION = "2"
+
+DL_DIR ?= "${BSPDIR}/downloads/"
+ACCEPT_FSL_EULA = "1"
+
+
+PACKAGE_CLASSES = "package_deb"
+EXTRA_IMAGE_FEATURES += "package-management"
+
+LICENSE_FLAGS_WHITELIST += "commercial "
+PACKAGECONFIG_pn-gstreamer1.0-plugins-ugly += "x264"
+
