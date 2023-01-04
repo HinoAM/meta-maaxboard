@@ -46,6 +46,14 @@ config IMX_UNIQUE_ID
 	depends on IMX8MQ && IMX_HAB && !SECURE_STICKY_BITS_LOCKUP
 	default 0x0
 
+config IMX8M_MCU_RDC_START_CONFIG_ADDR
+	hex "Start address of mcu rdc config when mcu starts"
+	default 0x186000
+
+config IMX8M_MCU_RDC_STOP_CONFIG_ADDR
+	hex "Start address of mcu rdc config when mcu stops"
+	default 0x187000
+
 choice
 	prompt  "NXP i.MX8M board select"
 	optional
@@ -77,8 +85,12 @@ config TARGET_IMX8MM_DDR4_VAL
 config TARGET_MAAXBOARD_MINI
         bool "maaxboard_mini"
         select IMX8MM
-		select SUPPORT_SPL
+        select SUPPORT_SPL
         select IMX8M_DDR4
+        select FSL_CAAM
+        select FSL_BLOB
+        select MISC
+        select SPL_CRYPTO_SUPPORT if SPL
 
 config TARGET_IMX8MM_DDR3L_VAL
 	bool "imx8mm DDR3L validation board"
@@ -105,10 +117,14 @@ config TARGET_IMX8MN_EVK
 	select IMX8M_LPDDR4
 
 config TARGET_MAAXBOARD_NANO
-        bool "maaxboard_nano"
+	bool "maaxboard_nano board"
 	select IMX8MN
-        select SUPPORT_SPL
-        select IMX8M_DDR4
+	select SUPPORT_SPL
+	select IMX8M_DDR4
+	select FSL_CAAM
+	select FSL_BLOB
+	select MISC
+	select SPL_CRYPTO_SUPPORT if SPL
 
 config TARGET_IMX8MN_DDR4_EVK
 	bool "imx8mn DDR4 EVK board"

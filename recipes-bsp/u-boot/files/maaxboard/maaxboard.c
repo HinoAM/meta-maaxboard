@@ -8,6 +8,7 @@
 #include <init.h>
 #include <malloc.h>
 #include <errno.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <miiphy.h>
 #include <netdev.h>
@@ -21,9 +22,9 @@
 #include <asm/mach-imx/mxc_i2c.h>
 #include <asm/arch/clock.h>
 #include <spl.h>
+#include <linux/bitops.h>
 #include <power/pmic.h>
 #include <power/pfuze100_pmic.h>
-#include <dm.h>
 #include "../../freescale/common/tcpc.h"
 #include "../../freescale/common/pfuze.h"
 #include <usb.h>
@@ -79,15 +80,18 @@ static int setup_fec(void)
 
 int board_phy_config(struct phy_device *phydev)
 {
+	if (phydev->drv->config)
+		phydev->drv->config(phydev);
+
+#ifndef CONFIG_DM_ETH
 	/* enable rgmii rxc skew and phy mode select to RGMII copper */
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x1f);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x8);
 
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1d, 0x05);
 	phy_write(phydev, MDIO_DEVAD_NONE, 0x1e, 0x100);
+#endif
 
-	if (phydev->drv->config)
-		phydev->drv->config(phydev);
 	return 0;
 }
 #endif
@@ -119,9 +123,9 @@ static struct dwc3_device dwc3_device_data = {
 	.power_down_scale = 2,
 };
 
-int usb_gadget_handle_interrupts(void)
+int usb_gadget_handle_interrupts(int index)
 {
-	dwc3_uboot_handle_interrupt(0);
+	dwc3_uboot_handle_interrupt(index);
 	return 0;
 }
 
@@ -276,13 +280,6 @@ int board_init(void)
 	return 0;
 }
 
-static void setup_usb(void)
-{
-	/* enable the power of usb3_0 */
-	gpio_request(IMX_GPIO_NR(1, 12), "usb_enable");
-	gpio_direction_output(IMX_GPIO_NR(1, 12), 1);
-}
-
 int board_late_init(void)
 {
 #ifdef CONFIG_ENV_VARS_UBOOT_RUNTIME_CONFIG
@@ -294,18 +291,8 @@ int board_late_init(void)
 	board_late_mmc_env_init();
 #endif
 
-	setup_usb();
 	return 0;
 }
-
-#ifdef CONFIG_FSL_FASTBOOT
-#ifdef CONFIG_ANDROID_RECOVERY
-int is_recovery_key_pressing(void)
-{
-	return 0; /*TODO*/
-}
-#endif /*CONFIG_ANDROID_RECOVERY*/
-#endif /*CONFIG_FSL_FASTBOOT*/
 
 #ifdef CONFIG_ANDROID_SUPPORT
 bool is_power_key_pressed(void) {
@@ -313,3 +300,11 @@ bool is_power_key_pressed(void) {
 }
 #endif
 
+#ifdef CONFIG_FSL_FASTBOOT
+#ifdef CONFIG_ANDROID_RECOVERY
+int is_recovery_key_pressing(void)
+{
+	return 0; /* TODO */
+}
+#endif /* CONFIG_ANDROID_RECOVERY */
+#endif /* CONFIG_FSL_FASTBOOT */

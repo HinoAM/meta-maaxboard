@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 # Firmware for AzureWave AW-CM390SM Modules
 SRC_URI += " \
@@ -12,10 +12,10 @@ az_install_firmware() {
     install -m 0644 ${WORKDIR}/maaxboard-firmware/AW_CM390SM/brcm/brcmfmac43455-sdio.txt ${D}${nonarch_base_libdir}/firmware/brcm
 }
 
-do_install_append_maaxboard () {
+do_install:append:maaxboard () {
     az_install_firmware
 }
 
-do_install_append_maaxboardmini () {
+do_install:append:maaxboardmini () {
     az_install_firmware
 }

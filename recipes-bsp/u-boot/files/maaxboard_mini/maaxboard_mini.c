@@ -16,6 +16,8 @@
 #include <asm/io.h>
 /*#include "../common/tcpc.h"*/
 #include <usb.h>
+#include <imx_sip.h>
+#include <linux/arm-smccc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -294,6 +296,8 @@ int board_ehci_usb_phy_mode(struct udevice *dev)
 
 int board_init(void)
 {
+	struct arm_smccc_res res;
+
 #ifdef CONFIG_USB_TCPC
 	setup_typec();
 #endif
@@ -301,9 +305,10 @@ int board_init(void)
 	if (IS_ENABLED(CONFIG_FEC_MXC))
 		setup_fec();
 
-	call_imx_sip(FSL_SIP_GPC, FSL_SIP_CONFIG_GPC_PM_DOMAIN, DISPMIX, true, 0);
-	call_imx_sip(FSL_SIP_GPC, FSL_SIP_CONFIG_GPC_PM_DOMAIN, MIPI, true, 0);
-
+	arm_smccc_smc(IMX_SIP_GPC, IMX_SIP_GPC_PM_DOMAIN,
+		      DISPMIX, true, 0, 0, 0, 0, &res);
+	arm_smccc_smc(IMX_SIP_GPC, IMX_SIP_GPC_PM_DOMAIN,
+		      MIPI, true, 0, 0, 0, 0, &res);
 	return 0;
 }
 

@@ -4,9 +4,14 @@
  */
 
 #include <common.h>
+#include <command.h>
 #include <cpu_func.h>
 #include <hang.h>
+#include <image.h>
+#include <init.h>
+#include <log.h>
 #include <spl.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/arch/clock.h>
@@ -21,6 +26,8 @@
 #include <asm/mach-imx/mxc_i2c.h>
 #include <fsl_esdhc_imx.h>
 #include <mmc.h>
+#include <linux/delay.h>
+#include <fsl_sec.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -92,7 +99,7 @@ static struct fsl_esdhc_cfg usdhc_cfg[1] = {
 	{USDHC1_BASE_ADDR, 0, 4},
 };
 
-int board_mmc_init(bd_t *bis)
+int board_mmc_init(struct bd_info *bis)
 {
 	int i, ret;
 	/*
@@ -138,7 +145,7 @@ int board_mmc_getcd(struct mmc *mmc)
 	return 1;
 }
 
-#ifdef CONFIG_POWER
+#if CONFIG_IS_ENABLED(POWER_LEGACY)
 #define I2C_PMIC	0
 int power_init_board(void)
 {
@@ -154,24 +161,24 @@ int power_init_board(void)
 
 
 	/* decrease RESET key long push time from the default 10s to 10ms */
-	pmic_reg_write(p, BD71837_PWRONCONFIG1, 0x0);
+	pmic_reg_write(p, BD718XX_PWRONCONFIG1, 0x0);
 
 	/* unlock the PMIC regs */
-	pmic_reg_write(p, BD71837_REGLOCK, 0x1);
+	pmic_reg_write(p, BD718XX_REGLOCK, 0x1);
 
 	/* increase VDD_SOC to typical value 0.85v before first DRAM access */
-	pmic_reg_write(p, BD71837_BUCK1_VOLT_RUN, 0x0f);
+	pmic_reg_write(p, BD718XX_BUCK1_VOLT_RUN, 0x0f);
 
 	/* increase VDD_DRAM to 0.975v for 3Ghz DDR */
-	pmic_reg_write(p, BD71837_BUCK5_VOLT, 0x83);
+	pmic_reg_write(p, BD718XX_1ST_NODVS_BUCK_VOLT, 0x83);
 
 #ifndef CONFIG_IMX8M_LPDDR4
 	/* increase NVCC_DRAM_1V2 to 1.2v for DDR4 */
-	pmic_reg_write(p, BD71837_BUCK8_VOLT, 0x28);
+	pmic_reg_write(p, BD718XX_4TH_NODVS_BUCK_VOLT, 0x28);
 #endif
 
 	/* lock the PMIC regs */
-	pmic_reg_write(p, BD71837_REGLOCK, 0x11);
+	pmic_reg_write(p, BD718XX_REGLOCK, 0x11);
 
 	return 0;
 }
@@ -179,6 +186,11 @@ int power_init_board(void)
 
 void spl_board_init(void)
 {
+	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+		if (sec_init())
+			printf("\nsec_init failed!\n");
+	}
+
 #ifndef CONFIG_SPL_USB_SDP_SUPPORT
 	/* Serial download mode */
 	if (is_usb_boot()) {
@@ -231,14 +243,4 @@ void board_init_f(ulong dummy)
 	spl_dram_init();
 
 	board_init_r(NULL, 0);
-
-}
-
-int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
-{
-	puts ("resetting ...\n");
-
-	reset_cpu(WDOG1_BASE_ADDR);
-
-	return 0;
 }

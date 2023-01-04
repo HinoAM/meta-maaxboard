@@ -1,8 +1,8 @@
 diff --git a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-index f63b9fcad..a89c7f941 100644
+index 8702d5160..e68102ee1 100644
 --- a/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mm/imx8mm_bl31_setup.c
-@@ -58,7 +58,7 @@ static const struct imx_rdc_cfg rdc[] = {
+@@ -108,7 +108,7 @@ static const struct imx_rdc_cfg rdc[] = {
  	RDC_MDAn(RDC_MDA_M4, DID1),
  
  	/* peripherals domain permission */
@@ -12,10 +12,10 @@ index f63b9fcad..a89c7f941 100644
  	RDC_PDAPn(RDC_PDAP_UART1, D0R | D0W),
  
 diff --git a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-index 71f3758c3..9c50e2ef2 100644
+index c87748a18..e9be22aae 100644
 --- a/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
 +++ b/plat/imx/imx8m/imx8mn/imx8mn_bl31_setup.c
-@@ -50,7 +50,7 @@ static const struct imx_rdc_cfg rdc[] = {
+@@ -105,7 +105,7 @@ static const struct imx_rdc_cfg rdc[] = {
  	RDC_MDAn(RDC_MDA_M7, DID1),
  
  	/* peripherals domain permission */

@@ -4,7 +4,7 @@ MACHINEOVERRIDES =. "mx8:mx8m:mx8mm:"
 MACHINEOVERRIDES =. "maaxboardbase:maaxboardmini:"
 
 require conf/machine/include/imx-base.inc
-require conf/machine/include/tune-cortexa53.inc
+require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 
 MACHINE_FEATURES += " pci wifi bluetooth bcm43455"
 
@@ -12,11 +12,14 @@ KERNEL_DEVICETREE  = "freescale/maaxboard-mini-mipi.dtb"
 #KERNEL_DEVICETREE += "freescale/maaxboard-mini-lvds.dtb"
 KERNEL_DEVICETREE += "freescale/maaxboard-mini-device.dtb"
 
-WKS_FILE_DEPENDS_append = " uenv"
+WKS_FILE_DEPENDS:append = " uenv"
 IMAGE_BOOT_FILES += "uEnv.txt"
 
 UBOOT_CONFIG ??= "sd"
 UBOOT_CONFIG[sd] = "maaxboard_mini_defconfig,sdcard"
+
+# Set ATF platform name
+ATF_PLATFORM = "imx8mm"
 
 # Set u-boot DTB
 UBOOT_DTB_NAME = "maaxboard-mini.dtb"
@@ -32,6 +35,7 @@ DDR_FIRMWARE_NAME = "ddr4_imem_1d.bin ddr4_dmem_1d.bin ddr4_imem_2d.bin ddr4_dme
 
 # More refer to meta-fsl-bsp-release/imx/meta-bsp/classes/image_types_fsl.bbclass
 IMAGE_BOOTLOADER = "imx-boot"
+IMX_BOOT_SOC_TARGET = "iMX8MM"
 IMX_BOOT_SEEK = "33"
 
 # Boot partition size [in KiB] for kernel and other data
@@ -45,15 +49,6 @@ SERIAL_CONSOLES = "115200;ttymxc0"
 UBOOT_SUFFIX = "bin"
 UBOOT_MAKE_TARGET = ""
 
-PREFERRED_PROVIDER_virtual/bootloader = "u-boot-imx"
-PREFERRED_PROVIDER_u-boot = "u-boot-imx"
-PREFERRED_VERSION_u-boot-imx = "2020.04"
-
-# meta-fsl-bsp-release/imx/meta-bsp/conf/machine/include/imx-base.inc
-PREFERRED_PROVIDER_virtual/kernel = "linux-imx"
-PREFERRED_VERSION_linux-imx = "5.4"
-PREFERRED_VERSION_linux-imx-headers = "5.4"
-
 # /etc/hostname
-hostname_pn-base-files = "maaxboard-mini"
+hostname:pn-base-files = "maaxboard-mini"
 

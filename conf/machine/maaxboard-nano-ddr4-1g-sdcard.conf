@@ -4,21 +4,24 @@ MACHINEOVERRIDES =. "mx8:mx8m:mx8mn:"
 MACHINEOVERRIDES =. "maaxboardbase:maaxboardnano:"
 
 require conf/machine/include/imx-base.inc
-require conf/machine/include/tune-cortexa53.inc
+require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 
 MACHINE_FEATURES += " wifi bluetooth nxp8987"
 
 KERNEL_DEVICETREE  = "freescale/maaxboard-nano-mipi.dtb"
 
-WKS_FILE_DEPENDS_append = " uenv"
+WKS_FILE_DEPENDS:append = " uenv"
 IMAGE_BOOT_FILES += "uEnv.txt"
 
 
 UBOOT_CONFIG ??= "sd"
 UBOOT_CONFIG[sd] = "maaxboard_nano_defconfig,sdcard"
 
+# Set ATF platform name
+ATF_PLATFORM = "imx8mn"
+
 # Set u-boot DTB
-UBOOT_DTB_NAME = "maaxboard-nano-mipi.dtb"
+UBOOT_DTB_NAME = "maaxboard-nano.dtb"
 
 # Set imx-mkimage boot target
 IMXBOOT_TARGETS = "flash_ddr4_evk"
@@ -31,6 +34,7 @@ DDR_FIRMWARE_NAME = "ddr4_imem_1d_201810.bin ddr4_dmem_1d_201810.bin ddr4_imem_2
 
 # More refer to meta-fsl-bsp-release/imx/meta-bsp/classes/image_types_fsl.bbclass
 IMAGE_BOOTLOADER = "imx-boot"
+IMX_BOOT_SOC_TARGET = "iMX8MN"
 IMX_BOOT_SEEK = "32"
 
 # Boot partition size [in KiB] for kernel and other data
@@ -45,14 +49,5 @@ LOADADDR = ""
 UBOOT_SUFFIX = "bin"
 UBOOT_MAKE_TARGET = ""
 
-PREFERRED_PROVIDER_virtual/bootloader = "u-boot-imx"
-PREFERRED_PROVIDER_u-boot = "u-boot-imx"
-PREFERRED_VERSION_u-boot-imx = "2020.04"
-
-# meta-fsl-bsp-release/imx/meta-bsp/conf/machine/include/imx-base.inc
-PREFERRED_PROVIDER_virtual/kernel = "linux-imx"
-PREFERRED_VERSION_linux-imx = "5.4"
-PREFERRED_VERSION_linux-imx-headers = "5.4"
-
 # /etc/hostname
-hostname_pn-base-files = "maaxboard-nano"
+hostname:pn-base-files = "maaxboard-nano"

@@ -4,11 +4,11 @@ MACHINEOVERRIDES =. "mx8:mx8m:mx8mq:"
 MACHINEOVERRIDES =. "maaxboardbase:maaxboard:"
 
 require conf/machine/include/imx-base.inc
-require conf/machine/include/tune-cortexa53.inc
+require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 
 MACHINE_FEATURES += " pci wifi bluetooth bcm43455"
 
-MACHINE_SOCARCH_FILTER_append_mx8mq = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d"
+MACHINE_SOCARCH_FILTER:append_mx8mq = " virtual/libopenvg virtual/libgles1 virtual/libgles2 virtual/egl virtual/mesa virtual/libgl virtual/libg2d"
 
 KERNEL_DEVICETREE = "freescale/maaxboard-dcss-hdmi.dtb"
 KERNEL_DEVICETREE += "freescale/maaxboard-dcss-mipi.dtb"
@@ -16,11 +16,14 @@ KERNEL_DEVICETREE += "freescale/maaxboard-lcdif-mipi.dtb"
 KERNEL_DEVICETREE += "freescale/maaxboard-dual-display.dtb"
 KERNEL_DEVICETREE += "freescale/maaxboard-usb0-device.dtb"
 
-WKS_FILE_DEPENDS_append = " uenv"
+WKS_FILE_DEPENDS:append = " uenv"
 IMAGE_BOOT_FILES += "uEnv.txt"
 
 UBOOT_CONFIG ??= "sd"
 UBOOT_CONFIG[sd] = "maaxboard_defconfig,sdcard"
+
+# Set ATF platform name
+ATF_PLATFORM = "imx8mq"
 
 # Set u-boot DTB
 UBOOT_DTB_NAME = "maaxboard.dtb"
@@ -36,6 +39,7 @@ DDR_FIRMWARE_NAME = "ddr4_imem_1d.bin ddr4_dmem_1d.bin ddr4_imem_2d.bin ddr4_dme
 
 # More refer to meta-fsl-bsp-release/imx/meta-bsp/classes/image_types_fsl.bbclass
 IMAGE_BOOTLOADER = "imx-boot"
+IMX_BOOT_SOC_TARGET = "iMX8MQ"
 IMX_BOOT_SEEK = "33"
 OPTEE_BIN_EXT = "8mq"
 
@@ -50,15 +54,6 @@ LOADADDR = ""
 UBOOT_SUFFIX = "bin"
 UBOOT_MAKE_TARGET = ""
 
-PREFERRED_PROVIDER_virtual/bootloader = "u-boot-imx"
-PREFERRED_PROVIDER_u-boot = "u-boot-imx"
-PREFERRED_VERSION_u-boot-imx = "2020.04"
-
-# meta-fsl-bsp-release/imx/meta-bsp/conf/machine/include/imx-base.inc
-PREFERRED_PROVIDER_virtual/kernel = "linux-imx"
-PREFERRED_VERSION_linux-imx = "5.4"
-PREFERRED_VERSION_linux-imx-headers = "5.4"
-
 # Use gstreamer 1.14 from meta-freescale
 PREFERRED_VERSION_gstreamer1.0 ?= "1.14.imx"
 PREFERRED_VERSION_gstreamer1.0-plugins-base ?= "1.14.imx"
@@ -67,4 +62,4 @@ PREFERRED_VERSION_gstreamer1.0-plugins-bad ?= "1.14.imx"
 PREFERRED_VERSION_gstreamer1.0-libav ?= "1.14.0"
 
 # /etc/hostname
-hostname_pn-base-files = "maaxboard"
+hostname:pn-base-files = "maaxboard"

@@ -22,7 +22,7 @@
 
 	chosen {
 		bootargs = "console=ttymxc1,115200 earlycon=ec_imx6q,0x30890000,115200";
-		stdout-path = &uart2;
+		stdout-path = &uart1;
 	};
 
 	regulators {
@@ -83,6 +83,13 @@
 
 	};
 
+	reg_usdhc1_vmmc: regulator-usdhc1 {
+		compatible = "regulator-fixed";
+		regulator-name = "VSD_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
     gpio_keys {
         compatible = "gpio-keys";
         pinctrl-names = "default";
@@ -101,11 +108,6 @@
             linux,code = <KEY_BACK>;
         };
 	};
-};
-
-&clk {
-	assigned-clocks = <&clk IMX8MM_AUDIO_PLL1>, <&clk IMX8MM_AUDIO_PLL2>;
-	assigned-clock-rates = <786432000>, <722534400>;
 };
 
 &iomuxc {
@@ -200,6 +202,12 @@
 				MX8MM_IOMUXC_ECSPI2_MOSI_UART4_DCE_TX  0x140
 				MX8MM_IOMUXC_ECSPI2_MISO_UART4_DCE_CTS_B  0x140
 				MX8MM_IOMUXC_ECSPI2_SS0_UART4_DCE_RTS_B  0x140
+			>;
+		};
+
+		pinctrl_usdhc1_gpio: usdhc1grpgpio {
+			fsl,pins = <
+				MX8MM_IOMUXC_GPIO1_IO06_GPIO1_IO6 0x41 /* CD detect */
 			>;
 		};
 
@@ -508,11 +516,14 @@
 };
 
 &usdhc1 {
+	assigned-clocks = <&clk IMX8MM_CLK_USDHC1>;
+	assigned-clock-rates = <200000000>;
 	pinctrl-names = "default", "state_100mhz";
-	pinctrl-0 = <&pinctrl_usdhc1>;
-	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
+	pinctrl-0 = <&pinctrl_usdhc1>, <&pinctrl_usdhc1_gpio>;
+	pinctrl-1 = <&pinctrl_usdhc1_100mhz>, <&pinctrl_usdhc1_gpio>;
+	cd-gpios = <&gpio1 6 GPIO_ACTIVE_LOW>; 
 	bus-width = <8>;
-	non-removable;
+	vmmc-supply = <&reg_usdhc1_vmmc>;
 	status = "okay";
 };
 

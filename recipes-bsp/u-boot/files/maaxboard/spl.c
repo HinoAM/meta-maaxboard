@@ -1,5 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
- * Copyright 2017 NXP
+ * Copyright 2018 NXP
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
@@ -7,21 +8,27 @@
 #include <common.h>
 #include <cpu_func.h>
 #include <hang.h>
-#include <spl.h>
+#include <image.h>
+#include <init.h>
+#include <log.h>
+#include <asm/global_data.h>
 #include <asm/io.h>
 #include <errno.h>
 #include <asm/io.h>
 #include <asm/arch/ddr.h>
 #include <asm/arch/imx8mq_pins.h>
 #include <asm/arch/sys_proto.h>
-#include <power/pmic.h>
-#include <power/bd71837.h>
 #include <asm/arch/clock.h>
 #include <asm/mach-imx/iomux-v3.h>
 #include <asm/mach-imx/gpio.h>
 #include <asm/mach-imx/mxc_i2c.h>
 #include <fsl_esdhc_imx.h>
+#include <fsl_sec.h>
 #include <mmc.h>
+#include <linux/delay.h>
+#include <power/pmic.h>
+#include <power/bd71837.h>
+#include <spl.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -30,7 +37,7 @@ extern struct dram_timing_info dram_timing;
 static void spl_dram_init(void)
 {
 	/* ddr init */
-	if ((get_cpu_rev() & 0xfff) == CHIP_REV_2_1)
+	if (soc_rev() >= CHIP_REV_2_1)
 		ddr_init(&dram_timing);
 	else
 		ddr_init(&dram_timing);
@@ -106,7 +113,7 @@ static struct fsl_esdhc_cfg usdhc_cfg[2] = {
 	{USDHC2_BASE_ADDR, 0, 4},
 };
 
-int board_mmc_init(bd_t *bis)
+int board_mmc_init(struct bd_info *bis)
 {
 	int i, ret;
 	/*
@@ -150,7 +157,7 @@ int board_mmc_init(bd_t *bis)
 	return 0;
 }
 
-#ifdef CONFIG_POWER
+#if CONFIG_IS_ENABLED(POWER_LEGACY)
 #define I2C_PMIC	0
 int power_init_board(void)
 {
@@ -158,26 +165,26 @@ int power_init_board(void)
 	int ret;
 
 	ret = power_bd71837_init(I2C_PMIC);
-    if (ret) {
-		printf("power init failed");
-        return -ENODEV;
-    }
+	if (ret)
+		return -ENODEV;
 
 	p = pmic_get("BD71837");
-	pmic_probe(p);
+	ret = pmic_probe(p);
+	if (ret)
+		return -ENODEV;
 
     printf("set buck8 to 1.2v for DDR4\n");
 	/* unlock the PMIC regs */
-	pmic_reg_write(p, BD71837_REGLOCK, 0x1);
+	pmic_reg_write(p, BD718XX_REGLOCK, 0x1);
 
 	/* increase VDD_DRAM to 0.9v for 2Ghz DDR */
-	pmic_reg_write(p, BD71837_BUCK5_VOLT, 0x2);
+	pmic_reg_write(p, BD718XX_1ST_NODVS_BUCK_VOLT, 0x2);
 
 	/* increase NVCC_DRAM_1V2 to 1.2v for DDR4 */
-	pmic_reg_write(p, BD71837_BUCK8_VOLT, 0x28);
+	pmic_reg_write(p, BD718XX_4TH_NODVS_BUCK_VOLT, 0x28);
 
 	/* lock the PMIC regs */
-	pmic_reg_write(p, BD71837_REGLOCK, 0x11);
+	pmic_reg_write(p, BD718XX_REGLOCK, 0x11);
 
 	return 0;
 }
@@ -185,6 +192,11 @@ int power_init_board(void)
 
 void spl_board_init(void)
 {
+	if (IS_ENABLED(CONFIG_FSL_CAAM)) {
+		if (sec_init())
+			printf("\nsec_init failed!\n");
+	}
+
 #ifndef CONFIG_SPL_USB_SDP_SUPPORT
 	/* Serial download mode */
 	if (is_usb_boot()) {
@@ -233,7 +245,6 @@ void board_init_f(ulong dummy)
 
 	enable_tzc380();
 
-	/* Adjust pmic voltage to 1.0V for 800M */
 	setup_i2c(0, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info1);
 
 	power_init_board();
@@ -242,13 +253,4 @@ void board_init_f(ulong dummy)
 	spl_dram_init();
 
 	board_init_r(NULL, 0);
-}
-
-int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
-{
-	puts ("resetting ...\n");
-
-	reset_cpu(WDOG1_BASE_ADDR);
-
-	return 0;
 }

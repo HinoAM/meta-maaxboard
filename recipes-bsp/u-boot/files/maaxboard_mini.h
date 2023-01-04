@@ -30,8 +30,8 @@
 /* For RAW image gives a error info not panic */
 #define CONFIG_SPL_ABORT_ON_RAW_IMAGE
 
-#define CONFIG_POWER
-#define CONFIG_POWER_I2C
+//#define CONFIG_POWER
+//#define CONFIG_POWER_I2C
 #define CONFIG_POWER_BD71837
 
 #define CONFIG_SYS_I2C
@@ -130,7 +130,7 @@
 	"initrd_addr=0x43800000\0"		\
 	"initrd_high=0xffffffffffffffff\0" \
 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
-	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
+	"mmcpart=1\0" \
 	"mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
 	"mmcautodetect=yes\0" \
 	"mmcargs=setenv bootargs ${jh_clk} console=${console} root=${mmcroot}\0 " \
@@ -186,9 +186,9 @@
 #endif
 
 /* Link Definitions */
-#define CONFIG_LOADADDR			0x40480000
+//#define CONFIG_LOADADDR			0x40480000
 
-#define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
+//#define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
 
 #define CONFIG_SYS_INIT_RAM_ADDR        0x40000000
 #define CONFIG_SYS_INIT_RAM_SIZE        0x200000
@@ -197,7 +197,8 @@
 #define CONFIG_SYS_INIT_SP_ADDR \
 	(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET)
 
-#define CONFIG_ENV_OVERWRITE
+//#define CONFIG_ENV_OVERWRITE
+
 #if defined(CONFIG_ENV_IS_IN_SPI_FLASH)
 #define CONFIG_ENV_SPI_BUS		CONFIG_SF_DEFAULT_BUS
 #define CONFIG_ENV_SPI_CS		CONFIG_SF_DEFAULT_CS
@@ -205,19 +206,19 @@
 #define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
 #endif
 
-#define CONFIG_ENV_SIZE			0x1000
-#define CONFIG_SYS_MMC_ENV_DEV		0   /* USDHC2 */
+//#define CONFIG_ENV_SIZE			0x1000
+//#define CONFIG_SYS_MMC_ENV_DEV		0   /* USDHC2 */
 #define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
 
 /* Size of malloc() pool */
-#define CONFIG_SYS_MALLOC_LEN		SZ_32M
+//#define CONFIG_SYS_MALLOC_LEN		SZ_32M
 
 #define CONFIG_SYS_SDRAM_BASE           0x40000000
 #define PHYS_SDRAM                      0x40000000
 #define PHYS_SDRAM_SIZE			0x80000000 /* 2GB DDR */
 
-#define CONFIG_SYS_MEMTEST_START	PHYS_SDRAM
-#define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_MEMTEST_START + (PHYS_SDRAM_SIZE >> 1))
+//#define CONFIG_SYS_MEMTEST_START	PHYS_SDRAM
+//#define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_MEMTEST_START + (PHYS_SDRAM_SIZE >> 1))
 
 #define CONFIG_MXC_UART_BASE		UART1_BASE_ADDR
 #define CONFIG_BAUDRATE             115200
@@ -233,11 +234,10 @@
 #define CONFIG_IMX_BOOTAUX
 
 /* USDHC */
-#define CONFIG_FSL_USDHC
+//#define CONFIG_FSL_USDHC
 
 #define CONFIG_SYS_FSL_USDHC_NUM	1
 #define CONFIG_SYS_FSL_ESDHC_ADDR       0
-#define CONFIG_SYS_MMC_IMG_LOAD_PART	1
 
 #ifdef CONFIG_FSL_FSPI
 #define FSL_FSPI_FLASH_SIZE		SZ_32M
@@ -264,13 +264,13 @@
 
 /* USB configs */
 #ifndef CONFIG_SPL_BUILD
-#define CONFIG_CMD_USB
-#define CONFIG_USB_STORAGE
+//#define CONFIG_CMD_USB
+//#define CONFIG_USB_STORAGE
 #define CONFIG_USBD_HS
 
-#define CONFIG_CMD_USB_MASS_STORAGE
-#define CONFIG_USB_GADGET_MASS_STORAGE
-#define CONFIG_USB_FUNCTION_MASS_STORAGE
+//#define CONFIG_CMD_USB_MASS_STORAGE
+//#define CONFIG_USB_GADGET_MASS_STORAGE
+//#define CONFIG_USB_FUNCTION_MASS_STORAGE
 
 #endif
 
@@ -282,9 +282,9 @@
 #ifdef CONFIG_DM_VIDEO
 #define CONFIG_VIDEO_MXS
 #define CONFIG_VIDEO_LOGO
-#define CONFIG_SPLASH_SCREEN
-#define CONFIG_SPLASH_SCREEN_ALIGN
-#define CONFIG_CMD_BMP
+//#define CONFIG_SPLASH_SCREEN
+//#define CONFIG_SPLASH_SCREEN_ALIGN
+//#define CONFIG_CMD_BMP
 #define CONFIG_BMP_16BPP
 #define CONFIG_BMP_24BPP
 #define CONFIG_BMP_32BPP
